@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-page="dashboard">
+<head>
+  <meta charset="UTF-8">
+  <title>Cafe Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h1>Cafe Dashboard</h1>
+
+  <!-- Role Selection -->
+  <label>
+    Role:
+    <select id="roleSelect">
+      <option value="customer">Customer</option>
+      <option value="admin">Admin</option>
+    </select>
+  </label>
+
+  <!-- Admin Section -->
+  <div id="adminSection" class="hidden">
+    <h2>Admin - Manage Menu</h2>
+
+    <!-- Add Menu Item Form -->
+    <form id="addForm">
+      <input type="text" id="addName" placeholder="Name" required>
+      <input type="number" id="addPrice" placeholder="Price" required>
+      <input type="text" id="addCategory" placeholder="Category">
+      <label>Available: <input type="checkbox" id="addAvailable" checked></label>
+      <button type="submit">Add Item</button>
+    </form>
+
+    <!-- Update Menu Item Form -->
+    <h3>Update Menu Item</h3>
+    <form id="updateForm">
+      <select id="updateSelect"><option value="">Select item</option></select>
+      <input type="text" id="updateName" placeholder="New Name">
+      <input type="number" id="updatePrice" placeholder="New Price">
+      <input type="text" id="updateCategory" placeholder="New Category">
+      <label>Available: <input type="checkbox" id="updateAvailable"></label>
+      <button type="submit">Update Item</button>
+    </form>
+
+    <!-- Admin Menu List -->
+    <h3>Menu Items</h3>
+    <ul id="adminMenuList"></ul>
+  </div>
+
+  <!-- Customer Section -->
+  <div id="customerSection">
+    <h2>Customer - Place Order</h2>
+    <ul id="customerMenuList"></ul>
+
+    <h3>Order Summary</h3>
+    <ul id="orderSummary"></ul>
+    <button id="submitOrder">Submit Order</button>
+  </div>
+
+  <!-- Link external JS -->
+  <script src="main.js"></script>
+</body>
+</html>
