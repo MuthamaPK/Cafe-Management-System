@@ -1,71 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Place Orders</title>
+  <title>Order History</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Place an Order</h1>
+  <h1>My Orders</h1>
 
-  <ul id="orderMenu"></ul>
-  <button id="submitOrder">Submit Order</button>
-
-  <div id="orderMessage"></div>
+  <div id="orders"></div>
 
   <script src="main.js"></script>
-  <script>
-    const token = localStorage.getItem("token");
-    let selectedItems = [];
-
-    async function loadOrderMenu() {
-      const res = await fetch(`${API_URL}/menu/`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      const menu = await res.json();
-      const list = document.getElementById("orderMenu");
-      list.innerHTML = menu.map(item => `
-        <li>
-          ${item.name} - $${item.price}
-          <input type="number" min="0" value="0" onchange="updateSelection(${item.id}, this.value)">
-        </li>
-      `).join("");
-    }
-
-    function updateSelection(id, qty) {
-      qty = parseInt(qty);
-      const existing = selectedItems.find(x => x.menu_item_id === id);
-      if (qty > 0) {
-        if (existing) existing.quantity = qty;
-        else selectedItems.push({ menu_item_id: id, quantity: qty });
-      } else {
-        selectedItems = selectedItems.filter(x => x.menu_item_id !== id);
-      }
-    }
-
-    document.getElementById("submitOrder").addEventListener("click", async () => {
-      if (selectedItems.length === 0) {
-        document.getElementById("orderMessage").innerText = "Select at least 1 item!";
-        return;
-      }
-      const res = await fetch(`${API_URL}/orders/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ items: selectedItems })
-      });
-      if (res.ok) {
-        document.getElementById("orderMessage").innerText = "Order placed successfully!";
-        selectedItems = [];
-        loadOrderMenu();
-      } else {
-        document.getElementById("orderMessage").innerText = "Error placing order!";
-      }
-    });
-
-    loadOrderMenu();
-  </script>
 </body>
 </html>

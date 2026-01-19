@@ -1,47 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body data-page="admin">
 
-  <h1>Admin - Manage Menu</h1>
+<header class="top-bar">
+    <h1>Admin Dashboard</h1>
+    <button id="logoutBtn">Logout</button>
+</header>
 
-  <!-- Add Menu Item -->
-  <h2>Add Menu Item</h2>
-  <form id="addForm">
-    <input type="text" id="addName" placeholder="Name" required>
-    <input type="number" id="addPrice" placeholder="Price" required>
-    <input type="text" id="addCategory" placeholder="Category">
-    <label>
-      Available:
-      <input type="checkbox" id="addAvailable" checked>
-    </label>
-    <button type="submit">Add Item</button>
-  </form>
+<main class="container">
 
-  <!-- Update Menu Item -->
-  <h2>Update Menu Item</h2>
-  <form id="updateForm">
-    <select id="updateSelect">
-      <option value="">Select item to update</option>
-    </select>
-    <input type="text" id="updateName" placeholder="New Name">
-    <input type="number" id="updatePrice" placeholder="New Price">
-    <input type="text" id="updateCategory" placeholder="New Category">
-    <label>
-      Available:
-      <input type="checkbox" id="updateAvailable">
-    </label>
-    <button type="submit">Update Item</button>
-  </form>
+    <!-- ADD MENU ITEM -->
+    <section class="card">
+        <h2>Add Menu Item</h2>
+        <form id="addMenuForm">
+            <input type="text" id="addName" placeholder="Item name" required>
+            <input type="number" id="addPrice" placeholder="Price" step="0.01" required>
+            <input type="text" id="addCategory" placeholder="Category">
+            <label class="checkbox">
+                <input type="checkbox" id="addAvailable" checked>
+                Available
+            </label>
+            <button type="submit">Add Item</button>
+        </form>
+    </section>
 
-  <!-- Menu List -->
-  <h2>Menu Items</h2>
-  <ul id="adminMenuList"></ul>
+    <!-- UPDATE MENU ITEM -->
+    <section class="card">
+        <h2>Update Menu Item</h2>
+        <form id="updateMenuForm">
+            <select id="updateSelect" required>
+                <option value="">Select item</option>
+            </select>
 
-  <script src="main.js"></script>
+            <input type="text" id="updateName" placeholder="New name">
+            <input type="number" id="updatePrice" placeholder="New price" step="0.01">
+            <input type="text" id="updateCategory" placeholder="New category">
+
+            <label class="checkbox">
+                <input type="checkbox" id="updateAvailable">
+                Available
+            </label>
+
+            <button type="submit">Update Item</button>
+        </form>
+    </section>
+
+    <!-- MENU LIST -->
+    <section class="card">
+        <h2>Menu Items</h2>
+        <ul id="adminMenuList" class="list"></ul>
+    </section>
+
+</main>
+
+<script src="main.js"></script>
 </body>
 </html>
