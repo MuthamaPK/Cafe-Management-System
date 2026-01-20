@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Customer Dashboard</title>
+    <title>Cafe Dashboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -10,7 +10,6 @@
 
 <header class="top-bar">
     <h1>Cafe Ordering</h1>
-
     <div class="actions">
         <a href="admin.html" id="adminLink" class="hidden">Admin Panel</a>
         <button onclick="logout()">Logout</button>
@@ -46,9 +45,21 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const role = localStorage.getItem("role");
+
+    // Show admin link only if role is admin
     if (role === "admin") {
         document.getElementById("adminLink").classList.remove("hidden");
     }
+
+    // Protect page for admin only if token missing
+    if (role === "admin" && !localStorage.getItem("token")) {
+        alert("Please login as admin");
+        window.location.href = "index.html";
+    }
+
+    // Load menu and orders dynamically
+    if (document.getElementById("menuList")) loadMenu();
+    if (document.getElementById("ordersList")) loadOrders();
 });
 </script>
 

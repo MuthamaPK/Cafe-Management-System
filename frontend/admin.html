@@ -64,17 +64,31 @@
 <script src="main.js"></script>
 
 <script>
-    // Hard protection: admin only
-    document.addEventListener("DOMContentLoaded", () => {
-        const role = localStorage.getItem("role");
-        if (role !== "admin") {
-            alert("Admins only");
-            window.location.href = "index.html";
-        }
+document.addEventListener("DOMContentLoaded", () => {
+    const role = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
 
-        document.getElementById("logoutBtn")
-            .addEventListener("click", logout);
-    });
+    // Hard admin protection
+    if (role !== "admin" || !token) {
+        alert("Access denied: Admins only");
+        window.location.href = "index.html";
+        return;
+    }
+
+    // Logout button
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+
+    // Load admin menu and attach form events
+    if (document.getElementById("adminMenuList")) {
+        loadAdminMenu();
+
+        const addForm = document.getElementById("addForm");
+        const updateForm = document.getElementById("updateForm");
+
+        addForm.addEventListener("submit", addItem);
+        updateForm.addEventListener("submit", updateItem);
+    }
+});
 </script>
 
 </body>

@@ -31,7 +31,7 @@ async function apiFetch(url, options = {}) {
         ...options,
         headers: {
             ...(options.headers || {}),
-            ...(options.auth !== false ? authHeaders() : {})
+            ...(options.auth !== false && isLoggedIn() ? authHeaders() : {})
         }
     });
 
@@ -49,7 +49,7 @@ async function apiFetch(url, options = {}) {
 }
 
 /* =========================
-   LOGIN (index.html)
+   LOGIN (admin)
 ========================= */
 async function login(e) {
     e.preventDefault();
@@ -69,6 +69,7 @@ async function login(e) {
 
         const data = await res.json();
         localStorage.setItem("token", data.access_token);
+        localStorage.setItem("role", "admin");
 
         window.location.href = "dashboard.html";
     } catch (err) {
@@ -79,10 +80,16 @@ async function login(e) {
 /* =========================
    PAGE PROTECTION
 ========================= */
-function protectPage() {
-    if (!isLoggedIn()) {
+function protectPage(requiredRole = null) {
+    const role = localStorage.getItem("role");
+
+    if (requiredRole && role !== requiredRole) {
+        alert("Access denied");
         window.location.href = "index.html";
+        return false;
     }
+
+    return true;
 }
 
 /* =========================
@@ -92,9 +99,9 @@ let menuItems = [];
 let order = [];
 
 async function loadMenu() {
-    menuItems = await apiFetch(`${API_URL}/menu/`);
-
+    menuItems = await apiFetch(`${API_URL}/menu/`, { auth: false });
     const menuDiv = document.getElementById("menuList");
+
     menuDiv.innerHTML = menuItems
         .filter(i => i.is_available)
         .map(item => `
@@ -145,44 +152,59 @@ function renderOrder() {
 async function submitOrder() {
     if (order.length === 0) return alert("Order is empty");
 
-    await apiFetch(`${API_URL}/orders/`, {
-        method: "POST",
-        body: JSON.stringify({
-            items: order.map(i => ({
-                menu_item_id: i.menu_item_id,
-                quantity: i.quantity
-            }))
-        })
-    });
+    try {
+        await apiFetch(`${API_URL}/orders/`, {
+            method: "POST",
+            auth: false, // <-- public order, no token required
+            body: JSON.stringify({
+                items: order.map(i => ({
+                    menu_item_id: i.menu_item_id,
+                    quantity: i.quantity
+                }))
+            })
+        });
 
-    order = [];
-    renderOrder();
-    alert("Order placed successfully!");
+        order = [];
+        renderOrder();
+        alert("Order placed successfully!");
+    } catch (err) {
+        alert("Failed to place order: " + err.message);
+    }
 }
 
 /* =========================
    ORDER HISTORY
 ========================= */
 async function loadOrders() {
-    const orders = await apiFetch(`${API_URL}/orders/`);
-    const container = document.getElementById("ordersList");
+    const ordersList = document.getElementById("ordersList");
+    if (!ordersList) return;
 
-    container.innerHTML = orders.map(o => `
-        <div class="card">
-            <h3>Order #${o.id}</h3>
-            <p>${new Date(o.created_at).toLocaleString()}</p>
-            <ul>
-                ${o.items.map(i => `
-                    <li>${i.quantity} × ${i.menu_item_id} @ $${i.unit_price}</li>
-                `).join("")}
-            </ul>
-            <strong>Total: $${o.total_amount}</strong>
-        </div>
-    `).join("");
+    try {
+        // Only fetch if user is logged in
+        if (isLoggedIn()) {
+            const orders = await apiFetch(`${API_URL}/orders/`);
+            ordersList.innerHTML = orders.map(o => `
+                <div class="card">
+                    <h3>Order #${o.id}</h3>
+                    <p>${new Date(o.created_at).toLocaleString()}</p>
+                    <ul>
+                        ${o.items.map(i => `
+                            <li>${i.quantity} × ${i.menu_item_id} @ $${i.unit_price}</li>
+                        `).join("")}
+                    </ul>
+                    <strong>Total: $${o.total_amount}</strong>
+                </div>
+            `).join("");
+        } else {
+            ordersList.innerHTML = "<p>Login to see order history.</p>";
+        }
+    } catch (err) {
+        ordersList.innerHTML = `<p>Error loading orders: ${err.message}</p>`;
+    }
 }
 
 /* =========================
-   ADMIN
+   ADMIN CRUD
 ========================= */
 async function loadAdminMenu() {
     const items = await apiFetch(`${API_URL}/menu/`);
@@ -196,14 +218,12 @@ async function loadAdminMenu() {
         </li>
     `).join("");
 
-    select.innerHTML =
-        `<option value="">Select item</option>` +
+    select.innerHTML = `<option value="">Select item</option>` +
         items.map(i => `<option value="${i.id}">${i.name}</option>`).join("");
 }
 
 async function addItem(e) {
     e.preventDefault();
-
     await apiFetch(`${API_URL}/menu/`, {
         method: "POST",
         body: JSON.stringify({
@@ -213,7 +233,6 @@ async function addItem(e) {
             is_available: addAvailable.checked
         })
     });
-
     e.target.reset();
     loadAdminMenu();
 }
@@ -247,24 +266,25 @@ async function updateItem(e) {
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
 
-    if (document.getElementById("loginForm")) {
-        document.getElementById("loginForm").addEventListener("submit", login);
-    }
+    const role = localStorage.getItem("role");
 
+    // Customer Dashboard
     if (document.getElementById("menuList")) {
-        protectPage();
         loadMenu();
-    }
-
-    if (document.getElementById("ordersList")) {
-        protectPage();
         loadOrders();
     }
 
+    // Admin Dashboard
     if (document.getElementById("adminMenuList")) {
-        protectPage();
+        if (!protectPage("admin")) return;
         loadAdminMenu();
         addForm.addEventListener("submit", addItem);
         updateForm.addEventListener("submit", updateItem);
+        logoutBtn.addEventListener("click", logout);
+    }
+
+    // Admin Login Form
+    if (document.getElementById("loginForm")) {
+        loginForm.addEventListener("submit", login);
     }
 });

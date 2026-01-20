@@ -16,12 +16,12 @@
         <p>Select how you want to continue</p>
 
         <!-- ROLE SELECTION -->
-        <div class="role-buttons">
+        <div class="role-buttons" id="roleButtons">
             <button id="customerBtn">Continue as Customer</button>
             <button id="adminBtn" class="danger">Admin Login</button>
         </div>
 
-        <!-- ADMIN LOGIN (hidden by default) -->
+        <!-- ADMIN LOGIN -->
         <form id="loginForm" class="hidden">
             <h2>Admin Login</h2>
 
@@ -30,6 +30,7 @@
                 id="username"
                 placeholder="Admin username"
                 autocomplete="username"
+                required
             >
 
             <input
@@ -37,6 +38,7 @@
                 id="password"
                 placeholder="Password"
                 autocomplete="current-password"
+                required
             >
 
             <button type="submit">Login</button>
@@ -60,25 +62,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminBtn = document.getElementById("adminBtn");
     const loginForm = document.getElementById("loginForm");
     const cancelLogin = document.getElementById("cancelLogin");
+    const roleButtons = document.getElementById("roleButtons");
 
-    // CUSTOMER FLOW
-    customerBtn.addEventListener("click", () => {
-        localStorage.setItem("role", "customer");
-        window.location.href = "dashboard.html";
-    });
+    // CUSTOMER FLOW (no auth)
+customerBtn.addEventListener("click", () => {
+    localStorage.setItem("role", "customer"); // store role
+    window.location.href = "dashboard.html";
+});
+
 
     // SHOW ADMIN LOGIN
     adminBtn.addEventListener("click", () => {
+        roleButtons.classList.add("hidden");
         loginForm.classList.remove("hidden");
-        adminBtn.disabled = true;
-        customerBtn.disabled = true;
     });
 
     // CANCEL ADMIN LOGIN
     cancelLogin.addEventListener("click", () => {
         loginForm.classList.add("hidden");
-        adminBtn.disabled = false;
-        customerBtn.disabled = false;
+        roleButtons.classList.remove("hidden");
     });
 
 });
